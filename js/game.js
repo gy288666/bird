@@ -181,15 +181,23 @@ const Game = (() => {
   }
 
   // ---------------- 输入 ----------------
+  let dragId = null;
   function onDown(e) {
     if (!running || paused || over) return;
     AudioSys.unlock();
     const p = toWorld(e);
-    if (state === 'idle' && currentBird) {
+    // 'aiming' 且 !dragging：上一次拖拽的 pointerup 丢失（如在 iframe 外松手）后自愈
+    if ((state === 'idle' || (state === 'aiming' && !dragging)) && currentBird) {
       const d = Math.hypot(p.x - currentBird.position.x, p.y - currentBird.position.y);
       if (d < 90) {
-        dragging = true; state = 'aiming'; dragPos = p;
+        dragging = true; dragId = e.pointerId; state = 'aiming'; dragPos = p;
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* 部分环境不支持 */ }
         AudioSys.stretch();
+        return;
+      }
+      if (state === 'aiming') { // 点了别处：把鸟放回弹弓
+        Body.setPosition(currentBird, { x: SLING.x, y: SLING.y });
+        state = 'idle';
         return;
       }
     }
@@ -197,13 +205,14 @@ const Game = (() => {
   }
 
   function onMove(e) {
-    if (!dragging) return;
+    if (!dragging || e.pointerId !== dragId) return;
     dragPos = toWorld(e);
   }
 
-  function onUp() {
+  function onUp(e) {
     if (!dragging) return;
-    dragging = false;
+    if (e && e.pointerId !== undefined && e.pointerId !== dragId) return;
+    dragging = false; dragId = null;
     const stretch = clampStretch(dragPos);
     const dx = SLING.x - stretch.x, dy = SLING.y - stretch.y;
     const dist = Math.hypot(dx, dy);
@@ -319,9 +328,9 @@ const Game = (() => {
     if (dv.kind === 'bird') return;
     let mass = Math.min(other.mass || 1, 26);
     let dmg = rel * mass * 0.42;
-    if (dOther.kind === 'bird') dmg *= 1.6 * (BIRDS[dOther.type] ? BIRDS[dOther.type].dmgMul : 1);
-    if (dOther.kind === 'ground' || dOther.kind === 'ledge') dmg = rel * Math.min(victim.mass, 26) * (dv.kind === 'pig' ? 0.5 : 0.28);
-    if (dmg < 4) return;
+    if (dOther.kind === 'bird') dmg *= 2.2 * (BIRDS[dOther.type] ? BIRDS[dOther.type].dmgMul : 1);
+    if (dOther.kind === 'ground' || dOther.kind === 'ledge') dmg = rel * Math.min(victim.mass, 26) * (dv.kind === 'pig' ? 0.55 : 0.28);
+    if (dmg < 3) return;
     damage(victim, dmg);
   }
 
@@ -433,6 +442,20 @@ const Game = (() => {
     }
   }
 
+  // 小鸟退场：明显的白色羽毛云，让"消失"读起来是回合结束而非 bug
+  function spawnBirdPoof(p) {
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2, sp = 1.5 + Math.random() * 3.5;
+      particles.push({
+        x: p.x, y: p.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.5,
+        size: 6 + Math.random() * 9, color: i % 2 ? 'rgba(255,255,255,0.95)' : '#eee',
+        life: 0.55 + Math.random() * 0.35, shape: 'circle', rot: 0, vr: 0,
+      });
+    }
+    floaters.push({ x: p.x, y: p.y - 26, v: '💨', life: 0.7, emoji: true });
+    AudioSys.flap();
+  }
+
   function spawnTrailBurst(p, color) {
     for (let i = 0; i < 10; i++) {
       const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 4;
@@ -482,8 +505,8 @@ const Game = (() => {
       const off = b.position.x > W + 40 || b.position.x < -100 || b.position.y > H + 60;
       const slow = Math.hypot(b.velocity.x, b.velocity.y) < 0.6;
       if (slow) calmFrames++; else calmFrames = 0;
-      if (d.dead || off || calmFrames > 55 || simTime - flightStart > 8) {
-        if (!d.dead && !off) { spawnTrailBurst(b.position, '#ccc'); }
+      if (d.dead || off || calmFrames > 70 || simTime - flightStart > 12) {
+        if (!d.dead && !off) { spawnBirdPoof(b.position); }
         pendingRemove.add(b);
         for (const eb of extraBirds) pendingRemove.add(eb);
         extraBirds = [];
@@ -494,6 +517,8 @@ const Game = (() => {
     } else if (state === 'settle') {
       settleTimer -= DT / 1000;
       if (settleTimer <= 0) { nextBird(); }
+    } else if (state === 'idle' && !currentBird && birdsQueue.length && !over) {
+      nextBird(); // 兜底自愈：任何异常导致弹弓空置时自动装填下一只
     }
 
     // 掉出世界的物体清理
@@ -998,6 +1023,8 @@ const Game = (() => {
     init, loadLevel, pause, resume, stop, isPaused,
     get score() { return score; },
     get levelNum() { return levelNum; },
+    get state() { return state; },
+    get birdsLeft() { return birdsQueue.length; },
     callbacks,
   };
 })();
