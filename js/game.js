@@ -116,6 +116,9 @@ const Game = (() => {
     const cfg = BIRDS[type];
     const r = small ? 12 : cfg.r;
     const body = Bodies.circle(x, y, r, { density: cfg.density, friction: 0.7, restitution: 0.35, frictionAir: 0.004 });
+    // 小鸟是主角，禁止休眠：静置在弹弓上超过 1 秒会被引擎判睡眠，
+    // 而 setVelocity 不会唤醒睡眠刚体，导致发射后凝固在半空
+    body.sleepThreshold = Infinity;
     return tag(body, { kind: 'bird', type, r, launched: false, dead: false });
   }
 
@@ -235,6 +238,7 @@ const Game = (() => {
     const d = dataOf(currentBird);
     d.launched = true;
     Body.setStatic(currentBird, false);
+    Matter.Sleeping.set(currentBird, false); // 双保险：确保发射瞬间是唤醒状态
     Body.setVelocity(currentBird, { x: vx, y: vy });
     Body.setAngularVelocity(currentBird, 0.2);
     birdsQueue.shift();
