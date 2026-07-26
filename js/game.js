@@ -494,6 +494,11 @@ const Game = (() => {
     if (pendingRemove.size) {
       for (const b of pendingRemove) Composite.remove(world, b);
       pendingRemove.clear();
+      // 支撑物消失后，睡眠中的邻居不会自动醒来（会悬空冻结），
+      // 全场唤醒让引擎重新结算受力；物体会在静止约 1 秒后再次入睡
+      for (const b of Composite.allBodies(world)) {
+        if (!b.isStatic) Matter.Sleeping.set(b, false);
+      }
     }
 
     // 拖拽跟随
