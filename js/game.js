@@ -20,7 +20,7 @@ const Game = (() => {
   const BIRDS = {
     red:    { r: 22, density: 0.0042, color: '#e33d2b', dmgMul: 1.0 },
     yellow: { r: 21, density: 0.0040, color: '#f7c331', dmgMul: 1.15 },
-    blue:   { r: 14, density: 0.0038, color: '#4aa8e0', dmgMul: 0.8 },
+    blue:   { r: 14, density: 0.0038, color: '#4aa8e0', dmgMul: 1.0 },
     black:  { r: 24, density: 0.0052, color: '#3a3a42', dmgMul: 1.1 },
     white:  { r: 23, density: 0.0036, color: '#f2ece2', dmgMul: 0.9 },
   };
@@ -103,7 +103,8 @@ const Game = (() => {
 
   function makePig(it) {
     const body = Bodies.circle(it.x, it.y, it.r, { density: 0.0012, friction: 0.5, restitution: 0.15 });
-    const hp = it.king ? 140 : (it.r >= 26 ? 70 : it.r >= 20 ? 45 : 28);
+    // 血量随体型分档：小猪要能被轻量的蓝鸟直击秒杀
+    const hp = it.king ? 140 : (it.r >= 26 ? 70 : it.r >= 20 ? 40 : it.r >= 16 ? 26 : 20);
     return tag(body, { kind: 'pig', hp, maxHp: hp, r: it.r, king: !!it.king, blink: Math.random() * 4 });
   }
 

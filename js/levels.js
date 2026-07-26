@@ -100,7 +100,7 @@ const Levels = (() => {
                G.pig(1000, 0, 18), G.SQ(1000, 38, 40, 'ice'),
                ...G.hut(1400, 0, 'ice') ] },
 
-    { name: '远方来客', birds: ['yellow', 'yellow', 'yellow'],
+    { name: '远方来客', birds: ['yellow', 'yellow', 'yellow', 'red'],
       items: [ ...G.hut(1300, 0, 'ice', 18), ...G.tower(1480, 2, 'ice', 45),
                G.pig(1480, 0, 16), G.pig(1480, 130, 16),
                G.pig(1160, 0, 16), G.SQ(1160, 36, 44, 'ice') ] },
@@ -111,7 +111,7 @@ const Levels = (() => {
                G.pig(1010, 0, 18),
                ...G.hut(1280, 0, 'ice'), G.pig(1280, 130, 16) ] },
 
-    { name: '蓝色三重奏', birds: ['blue', 'blue', 'blue'],
+    { name: '蓝色三重奏', birds: ['blue', 'blue', 'blue', 'blue'],
       items: [ ...G.hut(920, 0, 'ice', 15, 42), ...G.hut(1130, 0, 'ice', 15, 42),
                ...G.hut(1340, 0, 'ice', 15, 42),
                G.pig(1025, 0, 14), G.pig(1235, 0, 14) ] },
