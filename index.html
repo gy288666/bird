@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>怒鸟出击 · Furious Fowl</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-left">
+      <button class="icon-btn" id="btnPause" title="暂停">⏸</button>
+      <button class="icon-btn" id="btnRestartHud" title="重玩">↻</button>
+      <span id="hudLevel" class="hud-level"></span>
+    </div>
+    <div class="hud-right">
+      <span id="hudScore" class="hud-score">0</span>
+    </div>
+    <div id="hudHint" class="hud-hint hidden"></div>
+  </div>
+
+  <!-- 主菜单 -->
+  <div id="menu" class="screen">
+    <div class="title-wrap">
+      <h1 class="game-title">怒鸟出击</h1>
+      <div class="game-sub">Furious Fowl · 物理弹射游戏</div>
+    </div>
+    <div class="menu-birds" aria-hidden="true"></div>
+    <div class="menu-btns">
+      <button class="big-btn" id="btnPlay">开始游戏</button>
+      <button class="mid-btn" id="btnSound">🔊 音效：开</button>
+    </div>
+      <div class="credits">100 个关卡 · 5 种小鸟 · 拖拽弹弓发射，点击屏幕释放技能</div>
+  </div>
+
+  <!-- 选关 -->
+  <div id="levelSelect" class="screen hidden">
+    <div class="ls-head">
+      <button class="icon-btn" id="btnBackMenu" title="返回">←</button>
+      <h2>选择关卡</h2>
+      <span class="ls-total" id="lsStars"></span>
+    </div>
+    <div class="ls-grid" id="lsGrid"></div>
+  </div>
+
+  <!-- 暂停 -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="panel">
+      <h2>暂停</h2>
+      <button class="mid-btn" id="btnResume">继续</button>
+      <button class="mid-btn" id="btnRestartPause">重玩本关</button>
+      <button class="mid-btn" id="btnPauseSound">🔊 音效：开</button>
+      <button class="mid-btn" id="btnQuitPause">返回选关</button>
+    </div>
+  </div>
+
+  <!-- 结算 -->
+  <div id="result" class="overlay hidden">
+    <div class="panel">
+      <h2 id="resTitle">过关！</h2>
+      <div class="stars" id="resStars"><span>★</span><span>★</span><span>★</span></div>
+      <div class="res-score" id="resScore"></div>
+      <div class="res-best" id="resBest"></div>
+      <div class="res-btns">
+        <button class="mid-btn" id="btnResMenu">选关</button>
+        <button class="mid-btn" id="btnResRetry">重玩</button>
+        <button class="big-btn hidden" id="btnResNext">下一关 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/matter.min.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
